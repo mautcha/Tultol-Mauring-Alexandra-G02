@@ -70,7 +70,7 @@ ROOT_URLCONF = 'tultol.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -158,3 +158,9 @@ MAILERS = {
         'BACKEND': 'django.core.mail.backends.console.EmailBackend',
     },
 }
+
+# Auth URLs
+LOGIN_URL = 'accounts:register'
+LOGIN_REDIRECT_URL = 'root'
+LOGOUT_REDIRECT_URL = 'accounts:register'
+
