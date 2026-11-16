@@ -31,14 +31,14 @@
 
     <!-- Admin Tools -->
     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px;">
-        <div style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 14px; border-radius: 8px;">
-            <h4 style="font-size: 14px; margin-bottom: 4px;">🏪 Manage Tenants</h4>
+        <a href="{% url 'directory:store_list' %}" style="text-decoration: none; color: inherit; background: #f8fafc; border: 1px solid #e2e8f0; padding: 14px; border-radius: 8px; display: block;">
+            <h4 style="font-size: 14px; margin-bottom: 4px; color: #0f766e;">🏪 Manage Stores &amp; Tenants</h4>
             <p style="font-size: 12px; color: #64748b;">Add, update, or remove store listings and tenant data.</p>
-        </div>
-        <div style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 14px; border-radius: 8px;">
-            <h4 style="font-size: 14px; margin-bottom: 4px;">🗺️ Manage Floor Maps</h4>
-            <p style="font-size: 12px; color: #64748b;">Upload and configure floor plan layouts per level.</p>
-        </div>
+        </a>
+        <a href="{% url 'directory:mall_list' %}" style="text-decoration: none; color: inherit; background: #f8fafc; border: 1px solid #e2e8f0; padding: 14px; border-radius: 8px; display: block;">
+            <h4 style="font-size: 14px; margin-bottom: 4px; color: #0f766e;">🗺️ Manage Malls &amp; Floors</h4>
+            <p style="font-size: 12px; color: #64748b;">Configure malls, floor levels, and wing notes.</p>
+        </a>
         <div style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 14px; border-radius: 8px;">
             <h4 style="font-size: 14px; margin-bottom: 4px;">👥 User Management</h4>
             <p style="font-size: 12px; color: #64748b;">View and manage registered shopper accounts.</p>

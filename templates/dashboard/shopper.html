@@ -14,17 +14,17 @@
     </div>
 
     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px;">
-        <div style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 14px; border-radius: 8px;">
-            <h4 style="font-size: 14px; margin-bottom: 4px;">🗺️ Indoor Floor Maps</h4>
-            <p style="font-size: 12px; color: #64748b;">Interactive 2D digital floor plans with path routing.</p>
-        </div>
+        <a href="{% url 'directory:mall_list' %}" style="text-decoration: none; color: inherit; background: #f8fafc; border: 1px solid #e2e8f0; padding: 14px; border-radius: 8px; display: block;">
+            <h4 style="font-size: 14px; margin-bottom: 4px; color: #0f766e;">🗺️ Malls &amp; Floor Maps</h4>
+            <p style="font-size: 12px; color: #64748b;">Browse Metro Cebu malls, levels, and floor notes.</p>
+        </a>
+        <a href="{% url 'directory:store_list' %}" style="text-decoration: none; color: inherit; background: #f8fafc; border: 1px solid #e2e8f0; padding: 14px; border-radius: 8px; display: block;">
+            <h4 style="font-size: 14px; margin-bottom: 4px; color: #0f766e;">🔍 Store Search</h4>
+            <p style="font-size: 12px; color: #64748b;">Find stores, restrooms, ATMs, and indoor directions.</p>
+        </a>
         <div style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 14px; border-radius: 8px;">
             <h4 style="font-size: 14px; margin-bottom: 4px;">🚗 Parking Pin Saver</h4>
             <p style="font-size: 12px; color: #64748b;">Save your vehicle pillar code and parking level.</p>
-        </div>
-        <div style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 14px; border-radius: 8px;">
-            <h4 style="font-size: 14px; margin-bottom: 4px;">🔍 Store Search</h4>
-            <p style="font-size: 12px; color: #64748b;">Find stores, restrooms, ATMs, and exits quickly.</p>
         </div>
         <div style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 14px; border-radius: 8px;">
             <h4 style="font-size: 14px; margin-bottom: 4px;">📌 Saved Stores</h4>

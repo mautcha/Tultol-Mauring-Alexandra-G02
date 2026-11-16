@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+
+{% block title %}Store Directory - Tultol{% endblock %}
+
+{% block content %}
+<div class="card card-wide">
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap; margin-bottom: 16px;">
+        <div>
+            <h2>🔍 Mall Store Directory</h2>
+            <p class="card-subtitle" style="margin-bottom: 0;">Search stores, unit codes, and indoor directions across Metro Cebu malls.</p>
+        </div>
+        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+            <a href="{% url 'directory:mall_list' %}" class="btn-secondary">🏢 Malls &amp; Floors</a>
+            {% if is_admin %}
+                <a href="{% url 'directory:store_create' %}" class="btn-nav">+ Add Store</a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Search & Filter Form -->
+    <form method="get" style="display: grid; grid-template-columns: 2fr 1fr 1fr auto; gap: 10px; margin-bottom: 20px; align-items: end;">
+        <div>
+            <label for="id_q">Search</label>
+            <input type="text" id="id_q" name="q" value="{{ query }}" placeholder="Store name, unit code, or landmark...">
+        </div>
+        <div>
+            <label for="id_mall">Mall</label>
+            <select id="id_mall" name="mall">
+                <option value="">All Malls</option>
+                {% for mall in malls %}
+                    <option value="{{ mall.pk }}" {% if selected_mall == mall.pk|stringformat:"s" %}selected{% endif %}>
+                        {{ mall.name }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div>
+            <label for="id_category">Category</label>
+            <select id="id_category" name="category">
+                <option value="">All Categories</option>
+                {% for value, label in categories %}
+                    <option value="{{ value }}" {% if selected_category == value %}selected{% endif %}>
+                        {{ label }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div style="display: flex; gap: 6px;">
+            <button type="submit" class="btn-nav" style="border: none; cursor: pointer; padding: 10px 16px;">Filter</button>
+            {% if query or selected_mall or selected_category %}
+                <a href="{% url 'directory:store_list' %}" class="btn-secondary" style="padding: 9px 12px;">Reset</a>
+            {% endif %}
+        </div>
+    </form>
+
+    <!-- Store Cards -->
+    {% if stores %}
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+            {% for store in stores %}
+                <div style="border: 1px solid #e2e8f0; border-radius: 10px; padding: 16px; background: #f8fafc;">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-bottom: 8px;">
+                        <h3 style="font-size: 16px; color: #0f172a;">
+                            <a href="{% url 'directory:store_detail' store.pk %}" class="auth-link">{{ store.name }}</a>
+                        </h3>
+                        <span class="badge">{{ store.unit_code }}</span>
+                    </div>
+                    <p style="font-size: 13px; color: #475569; margin-bottom: 6px;">
+                        <strong>{{ store.mall.name }}</strong> &bull; {{ store.floor.name }}
+                    </p>
+                    <p style="font-size: 12px; color: #64748b; margin-bottom: 10px;">
+                        {{ store.get_category_display }} &bull;
+                        {% if store.is_open %}
+                            <span style="color: #15803d; font-weight: 600;">Open</span>
+                        {% else %}
+                            <span style="color: #b91c1c; font-weight: 600;">Temporarily Closed</span>
+                        {% endif %}
+                    </p>
+                    <p style="font-size: 13px; color: #334155; margin-bottom: 12px;">
+                        🧭 {{ store.landmark_directions|truncatechars:90 }}
+                    </p>
+                    <div style="display: flex; gap: 8px; align-items: center;">
+                        <a href="{% url 'directory:store_detail' store.pk %}" class="btn-secondary">View Directions</a>
+                        {% if is_admin %}
+                            <a href="{% url 'directory:store_update' store.pk %}" class="btn-secondary">Edit</a>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div style="text-align: center; padding: 32px 16px; background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 10px;">
+            <p style="font-size: 15px; color: #475569; margin-bottom: 10px;">No stores matched your search yet.</p>
+            {% if is_admin %}
+                <a href="{% url 'directory:mall_create' %}" class="btn-secondary">+ Add a Mall First</a>
+                <a href="{% url 'directory:store_create' %}" class="btn-nav" style="margin-left: 6px;">+ Add Store</a>
+            {% endif %}
+        </div>
+    {% endif %}
+
+    <div class="card-footer">
+        <a href="{% url 'dashboard:home' %}" class="auth-link">&larr; Back to Dashboard</a>
+    </div>
+</div>
+{% endblock %}
