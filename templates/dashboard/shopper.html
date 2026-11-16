@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+
+{% block title %}Shopper Dashboard - Tultol{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width: 600px; margin: 0 auto;">
+    <h2>🛍️ Shopper Dashboard</h2>
+    <p class="card-subtitle">Welcome, <strong>{{ user.username }}</strong>! Start navigating your mall.</p>
+
+    <div style="background-color: #f0fdf4; border: 1px solid #bbf7d0; padding: 14px 16px; border-radius: 8px; margin-bottom: 20px;">
+        <p style="font-size: 13px; color: #166534;">
+            🔒 <strong>Shopper Access Only.</strong> This dashboard is restricted to Shopper accounts. Mall Admins have a separate dashboard.
+        </p>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px;">
+        <div style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 14px; border-radius: 8px;">
+            <h4 style="font-size: 14px; margin-bottom: 4px;">🗺️ Indoor Floor Maps</h4>
+            <p style="font-size: 12px; color: #64748b;">Interactive 2D digital floor plans with path routing.</p>
+        </div>
+        <div style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 14px; border-radius: 8px;">
+            <h4 style="font-size: 14px; margin-bottom: 4px;">🚗 Parking Pin Saver</h4>
+            <p style="font-size: 12px; color: #64748b;">Save your vehicle pillar code and parking level.</p>
+        </div>
+        <div style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 14px; border-radius: 8px;">
+            <h4 style="font-size: 14px; margin-bottom: 4px;">🔍 Store Search</h4>
+            <p style="font-size: 12px; color: #64748b;">Find stores, restrooms, ATMs, and exits quickly.</p>
+        </div>
+        <div style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 14px; border-radius: 8px;">
+            <h4 style="font-size: 14px; margin-bottom: 4px;">📌 Saved Stores</h4>
+            <p style="font-size: 12px; color: #64748b;">Bookmark your favorite shops for fast access.</p>
+        </div>
+    </div>
+
+    <div class="card-footer" style="display: flex; justify-content: space-between; align-items: center;">
+        <span style="font-size: 13px; color: #64748b;">Role: <strong>Shopper</strong> &bull; {{ user.email }}</span>
+        <a href="{% url 'accounts:logout' %}" class="btn-nav btn-logout" style="text-decoration: none;">Sign Out</a>
+    </div>
+</div>
+{% endblock %}

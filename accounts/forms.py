@@ -5,6 +5,15 @@ from django.core.exceptions import ValidationError
 
 
 class RegistrationForm(forms.ModelForm):
+    role = forms.ChoiceField(
+        label="Account Role",
+        choices=[
+            ('shopper', 'Shopper (Mallgoer)'),
+            ('admin', 'Mall Admin / Staff'),
+        ],
+        initial='shopper',
+        required=True
+    )
     password = forms.CharField(
         label="Password",
         widget=forms.PasswordInput(attrs={'placeholder': 'Enter a password'}),
@@ -69,6 +78,13 @@ class RegistrationForm(forms.ModelForm):
         user.set_password(self.cleaned_data['password'])
         if commit:
             user.save()
+            # Assign selected role to the profile
+            role = self.cleaned_data.get('role', 'shopper')
+            user.profile.role = role
+            if role == 'admin':
+                user.is_staff = True
+            user.save()
+            user.profile.save()
         return user
 
 
