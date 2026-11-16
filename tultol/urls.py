@@ -2,8 +2,16 @@ from django.contrib import admin
 from django.urls import path, include
 from django.shortcuts import redirect
 
+
+def root_redirect(request):
+    if request.user.is_authenticated:
+        return redirect('dashboard:home')
+    return redirect('accounts:register')
+
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('accounts/', include('accounts.urls')),
-    path('', lambda request: redirect('accounts:register'), name='root'),
+    path('dashboard/', include('dashboard.urls')),
+    path('', root_redirect, name='root'),
 ]

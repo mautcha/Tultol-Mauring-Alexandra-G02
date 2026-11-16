@@ -160,7 +160,7 @@ MAILERS = {
 }
 
 # Auth URLs
-LOGIN_URL = 'accounts:register'
-LOGIN_REDIRECT_URL = 'root'
-LOGOUT_REDIRECT_URL = 'accounts:register'
+LOGIN_URL = 'accounts:login'
+LOGIN_REDIRECT_URL = 'dashboard:home'
+LOGOUT_REDIRECT_URL = 'accounts:login'
 

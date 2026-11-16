@@ -70,3 +70,16 @@ class RegistrationForm(forms.ModelForm):
         if commit:
             user.save()
         return user
+
+
+class LoginForm(forms.Form):
+    username = forms.CharField(
+        label="Username or Email",
+        widget=forms.TextInput(attrs={'placeholder': 'Enter your username or email'}),
+        required=True
+    )
+    password = forms.CharField(
+        label="Password",
+        widget=forms.PasswordInput(attrs={'placeholder': 'Enter your password'}),
+        required=True
+    )
