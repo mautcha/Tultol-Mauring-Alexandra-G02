@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+
+{% block title %}My Saved Stores - Tultol{% endblock %}
+
+{% block content %}
+<div class="card card-wide">
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap; margin-bottom: 20px;">
+        <div>
+            <h2>📌 My Saved Stores</h2>
+            <p class="card-subtitle" style="margin-bottom: 0;">Your personal bookmarked stores and visit notes.</p>
+        </div>
+        <a href="{% url 'directory:store_list' %}" class="btn-nav">Browse Directory</a>
+    </div>
+
+    {% if saved_stores %}
+        <div style="display: flex; flex-direction: column; gap: 12px;">
+            {% for item in saved_stores %}
+                <div style="border: 1px solid #e2e8f0; border-radius: 10px; padding: 16px; background: #f8fafc;">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; flex-wrap: wrap;">
+                        <div>
+                            <h3 style="font-size: 16px; margin-bottom: 4px;">
+                                <a href="{% url 'directory:store_detail' item.store.pk %}" class="auth-link">{{ item.store.name }}</a>
+                                <span class="badge" style="margin-left: 6px;">{{ item.store.unit_code }}</span>
+                            </h3>
+                            <p style="font-size: 13px; color: #475569;">
+                                {{ item.store.mall.name }} &bull; {{ item.store.floor.name }}
+                            </p>
+                            {% if item.note %}
+                                <p style="font-size: 13px; color: #0f766e; margin-top: 8px; background: #f0fdfa; padding: 6px 10px; border-radius: 6px; border: 1px solid #99f6e4;">
+                                    📝 {{ item.note }}
+                                </p>
+                            {% endif %}
+                        </div>
+                        <div style="display: flex; gap: 6px; align-items: center;">
+                            <a href="{% url 'directory:saved_update' item.pk %}" class="btn-secondary">Edit Note</a>
+                            <form method="post" action="{% url 'directory:saved_delete' item.pk %}" style="display: inline;" onsubmit="return confirm('Remove {{ item.store.name }} from saved stores?');">
+                                {% csrf_token %}
+                                <button type="submit" class="btn-danger">Remove</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div style="text-align: center; padding: 32px 16px; background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 10px;">
+            <p style="font-size: 15px; color: #475569; margin-bottom: 10px;">You haven't saved any stores yet.</p>
+            <a href="{% url 'directory:store_list' %}" class="btn-nav">Find Stores to Save</a>
+        </div>
+    {% endif %}
+
+    <div class="card-footer">
+        <a href="{% url 'dashboard:home' %}" class="auth-link">&larr; Back to Dashboard</a>
+    </div>
+</div>
+{% endblock %}

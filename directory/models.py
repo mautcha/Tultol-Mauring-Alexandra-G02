@@ -78,3 +78,19 @@ class Store(models.Model):
 
     def __str__(self):
         return f"{self.name} ({self.unit_code} - {self.floor.mall.name})"
+
+
+class SavedStore(models.Model):
+    """Represents a shopper's bookmarked store with a personal visit note."""
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='saved_stores')
+    store = models.ForeignKey(Store, on_delete=models.CASCADE, related_name='saved_by_users')
+    note = models.CharField(max_length=200, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('user', 'store')
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.user.username} saved {self.store.name}"

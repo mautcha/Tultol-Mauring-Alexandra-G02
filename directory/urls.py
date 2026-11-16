@@ -18,4 +18,9 @@ urlpatterns = [
     path('floors/add/', views.floor_create_view, name='floor_create'),
     path('floors/<int:pk>/edit/', views.floor_update_view, name='floor_update'),
     path('floors/<int:pk>/delete/', views.floor_delete_view, name='floor_delete'),
+
+    path('saved/', views.saved_store_list_view, name='saved_list'),
+    path('saved/add/<int:store_pk>/', views.saved_store_create_view, name='saved_create'),
+    path('saved/<int:pk>/edit/', views.saved_store_update_view, name='saved_update'),
+    path('saved/<int:pk>/delete/', views.saved_store_delete_view, name='saved_delete'),
 ]

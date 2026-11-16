@@ -4,8 +4,8 @@ from django.contrib import messages
 from django.db.models import Q
 from django.views.decorators.http import require_POST
 from dashboard.views import role_required
-from .models import Mall, Floor, Store
-from .forms import MallForm, FloorForm, StoreForm
+from .models import Mall, Floor, Store, SavedStore
+from .forms import MallForm, FloorForm, StoreForm, SavedStoreForm
 
 
 # --- Shopper & Admin Directory Browsing ---
@@ -31,6 +31,9 @@ def store_list_view(request):
 
     malls = Mall.objects.all()
     is_admin = getattr(getattr(request.user, 'profile', None), 'role', 'shopper') == 'admin' or request.user.is_superuser
+    saved_store_ids = set(
+        SavedStore.objects.filter(user=request.user).values_list('store_id', flat=True)
+    )
 
     return render(request, 'directory/store_list.html', {
         'stores': stores,
@@ -40,6 +43,7 @@ def store_list_view(request):
         'selected_mall': mall_id,
         'selected_category': category,
         'is_admin': is_admin,
+        'saved_store_ids': saved_store_ids,
     })
 
 
@@ -48,9 +52,11 @@ def store_detail_view(request, pk):
     """Display full store location, floor info, and landmark directions."""
     store = get_object_or_404(Store.objects.select_related('mall', 'floor'), pk=pk)
     is_admin = getattr(getattr(request.user, 'profile', None), 'role', 'shopper') == 'admin' or request.user.is_superuser
+    saved_entry = SavedStore.objects.filter(user=request.user, store=store).first()
     return render(request, 'directory/store_detail.html', {
         'store': store,
         'is_admin': is_admin,
+        'saved_entry': saved_entry,
     })
 
 
@@ -241,3 +247,66 @@ def store_delete_view(request, pk):
     store.delete()
     messages.success(request, f"Store '{name}' deleted.")
     return redirect('directory:store_list')
+
+
+# --- Shopper Bookmarks: Saved Stores (user-owned CRUD) ---
+
+@login_required
+def saved_store_list_view(request):
+    """List only the logged-in user's own saved stores."""
+    saved_stores = SavedStore.objects.filter(user=request.user).select_related(
+        'store', 'store__mall', 'store__floor'
+    )
+    return render(request, 'directory/saved_list.html', {
+        'saved_stores': saved_stores,
+    })
+
+
+@login_required
+@require_POST
+def saved_store_create_view(request, store_pk):
+    """Bookmark a store for the logged-in user."""
+    store = get_object_or_404(Store, pk=store_pk)
+    note = request.POST.get('note', '').strip()[:200]
+    saved, created = SavedStore.objects.get_or_create(
+        user=request.user,
+        store=store,
+        defaults={'note': note},
+    )
+    if created:
+        messages.success(request, f"Saved '{store.name}' to your bookmarks.")
+    else:
+        messages.info(request, f"'{store.name}' is already in your saved stores.")
+    return redirect('directory:store_detail', pk=store.pk)
+
+
+@login_required
+def saved_store_update_view(request, pk):
+    """Update the personal note on the user's own saved store."""
+    saved = get_object_or_404(SavedStore, pk=pk, user=request.user)
+    if request.method == 'POST':
+        form = SavedStoreForm(request.POST, instance=saved)
+        if form.is_valid():
+            form.save()
+            messages.success(request, f"Updated note for '{saved.store.name}'.")
+            return redirect('directory:saved_list')
+        messages.error(request, "Please fix the errors below.")
+    else:
+        form = SavedStoreForm(instance=saved)
+    return render(request, 'directory/form.html', {
+        'form': form,
+        'title': f'Edit Note: {saved.store.name}',
+        'subtitle': f'{saved.store.mall.name} — {saved.store.floor.name} ({saved.store.unit_code})',
+        'back_url': 'directory:saved_list',
+    })
+
+
+@login_required
+@require_POST
+def saved_store_delete_view(request, pk):
+    """Remove a store from the logged-in user's own saved list."""
+    saved = get_object_or_404(SavedStore, pk=pk, user=request.user)
+    name = saved.store.name
+    saved.delete()
+    messages.success(request, f"Removed '{name}' from your saved stores.")
+    return redirect('directory:saved_list')

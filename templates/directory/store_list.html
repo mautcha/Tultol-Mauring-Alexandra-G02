@@ -80,6 +80,9 @@
                     </p>
                     <div style="display: flex; gap: 8px; align-items: center;">
                         <a href="{% url 'directory:store_detail' store.pk %}" class="btn-secondary">View Directions</a>
+                        {% if store.pk in saved_store_ids %}
+                            <span class="badge">📌 Saved</span>
+                        {% endif %}
                         {% if is_admin %}
                             <a href="{% url 'directory:store_update' store.pk %}" class="btn-secondary">Edit</a>
                         {% endif %}
