@@ -28,6 +28,32 @@
         <p style="font-size: 15px; color: #0f172a; line-height: 1.5;">{{ store.landmark_directions }}</p>
     </div>
 
+    <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 14px; margin-bottom: 18px;">
+        {% if saved_entry %}
+            <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap;">
+                <div>
+                    <strong style="font-size: 14px; color: #0f766e;">📌 Saved in your bookmarks</strong>
+                    {% if saved_entry.note %}
+                        <p style="font-size: 13px; color: #334155; margin-top: 4px;">Note: {{ saved_entry.note }}</p>
+                    {% endif %}
+                </div>
+                <div style="display: flex; gap: 8px;">
+                    <a href="{% url 'directory:saved_update' saved_entry.pk %}" class="btn-secondary">Edit Note</a>
+                    <form method="post" action="{% url 'directory:saved_delete' saved_entry.pk %}" style="display: inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn-danger">Remove</button>
+                    </form>
+                </div>
+            </div>
+        {% else %}
+            <form method="post" action="{% url 'directory:saved_create' store.pk %}" style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                {% csrf_token %}
+                <input type="text" name="note" placeholder="Optional visit note (e.g. Pick up order)" style="flex: 1; min-width: 200px;">
+                <button type="submit" class="btn-nav" style="border: none; cursor: pointer;">📌 Save Store</button>
+            </form>
+        {% endif %}
+    </div>
+
     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px;">
         <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 14px;">
             <label>Floor &amp; Wing Notes</label>

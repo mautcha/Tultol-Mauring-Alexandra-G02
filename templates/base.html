@@ -316,6 +316,7 @@
                 <span class="user-greeting">Hi, <strong>{{ user.username }}</strong></span>
                 <a href="{% url 'dashboard:home' %}" class="nav-link">Dashboard</a>
                 <a href="{% url 'directory:store_list' %}" class="nav-link">Directory</a>
+                <a href="{% url 'directory:saved_list' %}" class="nav-link">Saved</a>
                 <a href="{% url 'accounts:profile' %}" class="nav-link">Profile</a>
                 <form method="post" action="{% url 'accounts:logout' %}" style="display: inline;">
                     {% csrf_token %}

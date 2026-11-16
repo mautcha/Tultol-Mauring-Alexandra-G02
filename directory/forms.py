@@ -1,6 +1,6 @@
 from django import forms
 from django.core.exceptions import ValidationError
-from .models import Mall, Floor, Store
+from .models import Mall, Floor, Store, SavedStore
 
 
 class MallForm(forms.ModelForm):
@@ -89,3 +89,20 @@ class StoreForm(forms.ModelForm):
         if commit:
             store.save()
         return store
+
+
+class SavedStoreForm(forms.ModelForm):
+    """Form for shoppers to add or update a personal note on a saved store."""
+
+    class Meta:
+        model = SavedStore
+        fields = ['note']
+        widgets = {
+            'note': forms.TextInput(attrs={'placeholder': 'Optional note (e.g. Meet friends at 3 PM)'}),
+        }
+        labels = {
+            'note': 'Personal Note',
+        }
+
+    def clean_note(self):
+        return self.cleaned_data.get('note', '').strip()

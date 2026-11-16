@@ -1,7 +1,7 @@
 from django.test import TestCase, Client
 from django.urls import reverse
 from django.contrib.auth.models import User
-from .models import Mall, Floor, Store
+from .models import Mall, Floor, Store, SavedStore
 
 
 class MallStoreDirectoryTests(TestCase):
@@ -128,3 +128,49 @@ class MallStoreDirectoryTests(TestCase):
         del_resp = self.client.post(reverse('directory:store_delete', args=[jollibee.pk]), follow=True)
         self.assertRedirects(del_resp, reverse('directory:store_list'))
         self.assertFalse(Store.objects.filter(pk=jollibee.pk).exists())
+
+    def test_shopper_saved_stores_crud_and_ownership(self):
+        other_shopper = User.objects.create_user(
+            username='shopper2', email='s2@example.com', password='Password123!'
+        )
+        self.client.login(username='shopper1', password='Password123!')
+
+        # Save store (Create)
+        create_resp = self.client.post(reverse('directory:saved_create', args=[self.store.pk]), {
+            'note': 'Buy art supplies',
+        }, follow=True)
+        self.assertRedirects(create_resp, reverse('directory:store_detail', args=[self.store.pk]))
+        saved = SavedStore.objects.get(user=self.shopper, store=self.store)
+        self.assertEqual(saved.note, 'Buy art supplies')
+
+        # Duplicate save does not create second row
+        self.client.post(reverse('directory:saved_create', args=[self.store.pk]), {'note': 'Duplicate'})
+        self.assertEqual(SavedStore.objects.filter(user=self.shopper, store=self.store).count(), 1)
+
+        # List own saved stores (Read)
+        list_resp = self.client.get(reverse('directory:saved_list'))
+        self.assertContains(list_resp, 'National Book Store')
+        self.assertContains(list_resp, 'Buy art supplies')
+
+        # Update note (Update)
+        upd_resp = self.client.post(reverse('directory:saved_update', args=[saved.pk]), {
+            'note': 'Pick up notebooks at 4 PM',
+        }, follow=True)
+        self.assertRedirects(upd_resp, reverse('directory:saved_list'))
+        saved.refresh_from_db()
+        self.assertEqual(saved.note, 'Pick up notebooks at 4 PM')
+
+        # Another user cannot view/edit/delete shopper1's bookmark
+        self.client.logout()
+        self.client.login(username='shopper2', password='Password123!')
+        self.assertEqual(self.client.get(reverse('directory:saved_update', args=[saved.pk])).status_code, 404)
+        self.assertEqual(self.client.post(reverse('directory:saved_delete', args=[saved.pk])).status_code, 404)
+        other_list = self.client.get(reverse('directory:saved_list'))
+        self.assertNotContains(other_list, 'National Book Store')
+
+        # Original owner can delete (Delete)
+        self.client.logout()
+        self.client.login(username='shopper1', password='Password123!')
+        del_resp = self.client.post(reverse('directory:saved_delete', args=[saved.pk]), follow=True)
+        self.assertRedirects(del_resp, reverse('directory:saved_list'))
+        self.assertFalse(SavedStore.objects.filter(pk=saved.pk).exists())
