@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+
+{% block title %}Malls & Floors - Tultol{% endblock %}
+
+{% block content %}
+<div class="card card-wide">
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap; margin-bottom: 20px;">
+        <div>
+            <h2>🏢 Malls &amp; Floor Levels</h2>
+            <p class="card-subtitle" style="margin-bottom: 0;">Explore supported malls and floor layouts.</p>
+        </div>
+        {% if is_admin %}
+            <div style="display: flex; gap: 8px;">
+                <a href="{% url 'directory:mall_create' %}" class="btn-nav">+ Add Mall</a>
+                <a href="{% url 'directory:floor_create' %}" class="btn-secondary">+ Add Floor</a>
+            </div>
+        {% endif %}
+    </div>
+
+    {% if malls %}
+        <div style="display: flex; flex-direction: column; gap: 16px;">
+            {% for mall in malls %}
+                <div style="border: 1px solid #e2e8f0; border-radius: 10px; padding: 18px; background: #f8fafc;">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; flex-wrap: wrap;">
+                        <div>
+                            <h3 style="font-size: 18px; color: #0f172a;">{{ mall.name }}</h3>
+                            <p style="font-size: 13px; color: #475569;">{{ mall.address }}, {{ mall.city }} &bull; {{ mall.opening_hours }}</p>
+                        </div>
+                        <div style="display: flex; gap: 8px;">
+                            <a href="{% url 'directory:store_list' %}?mall={{ mall.pk }}" class="btn-secondary">View Stores</a>
+                            {% if is_admin %}
+                                <a href="{% url 'directory:mall_update' mall.pk %}" class="btn-secondary">Edit</a>
+                                <form method="post" action="{% url 'directory:mall_delete' mall.pk %}" style="display: inline;" onsubmit="return confirm('Delete {{ mall.name }} and all its floors/stores?');">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn-danger">Delete</button>
+                                </form>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 14px; border-top: 1px solid #e2e8f0; padding-top: 12px;">
+                        <p style="font-size: 12px; font-weight: 600; color: #64748b; margin-bottom: 8px; text-transform: uppercase;">Floors</p>
+                        {% if mall.floors.all %}
+                            <div style="display: flex; flex-direction: column; gap: 8px;">
+                                {% for floor in mall.floors.all %}
+                                    <div style="display: flex; justify-content: space-between; align-items: center; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px 12px;">
+                                        <div>
+                                            <strong style="font-size: 14px;">{{ floor.name }}</strong>
+                                            <span style="font-size: 12px; color: #64748b;">(Level {{ floor.floor_number }})</span>
+                                            {% if floor.map_notes %}
+                                                <p style="font-size: 12px; color: #475569; margin-top: 2px;">{{ floor.map_notes }}</p>
+                                            {% endif %}
+                                        </div>
+                                        {% if is_admin %}
+                                            <div style="display: flex; gap: 6px;">
+                                                <a href="{% url 'directory:floor_update' floor.pk %}" class="btn-secondary">Edit</a>
+                                                <form method="post" action="{% url 'directory:floor_delete' floor.pk %}" style="display: inline;" onsubmit="return confirm('Delete {{ floor.name }}?');">
+                                                    {% csrf_token %}
+                                                    <button type="submit" class="btn-danger">Delete</button>
+                                                </form>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <p style="font-size: 13px; color: #64748b;">No floors added yet.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div style="text-align: center; padding: 32px 16px; background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 10px;">
+            <p style="font-size: 15px; color: #475569; margin-bottom: 10px;">No malls have been added yet.</p>
+            {% if is_admin %}
+                <a href="{% url 'directory:mall_create' %}" class="btn-nav">+ Add First Mall</a>
+            {% endif %}
+        </div>
+    {% endif %}
+
+    <div class="card-footer">
+        <a href="{% url 'directory:store_list' %}" class="auth-link">&larr; Back to Store Directory</a>
+    </div>
+</div>
+{% endblock %}
