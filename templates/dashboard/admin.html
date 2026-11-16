@@ -51,7 +51,13 @@
 
     <div class="card-footer" style="display: flex; justify-content: space-between; align-items: center;">
         <span style="font-size: 13px; color: #64748b;">Role: <strong>Mall Admin</strong> &bull; {{ user.email }}</span>
-        <a href="{% url 'accounts:logout' %}" class="btn-nav btn-logout" style="text-decoration: none;">Sign Out</a>
+        <div style="display: flex; gap: 10px; align-items: center;">
+            <a href="{% url 'accounts:profile' %}" class="auth-link" style="font-size: 14px;">My Profile</a>
+            <form method="post" action="{% url 'accounts:logout' %}" style="display: inline;">
+                {% csrf_token %}
+                <button type="submit" class="btn-nav btn-logout">Sign Out</button>
+            </form>
+        </div>
     </div>
 </div>
 {% endblock %}

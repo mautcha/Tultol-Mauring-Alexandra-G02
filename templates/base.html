@@ -90,6 +90,8 @@
             background-color: #f1f5f9;
             color: #475569;
             border: 1px solid #cbd5e1;
+            cursor: pointer;
+            font-family: inherit;
         }
 
         .btn-logout:hover {
@@ -253,7 +255,11 @@
             {% if user.is_authenticated %}
                 <span class="user-greeting">Hi, <strong>{{ user.username }}</strong></span>
                 <a href="{% url 'dashboard:home' %}" class="nav-link">Dashboard</a>
-                <a href="{% url 'accounts:logout' %}" class="btn-nav btn-logout">Sign Out</a>
+                <a href="{% url 'accounts:profile' %}" class="nav-link">Profile</a>
+                <form method="post" action="{% url 'accounts:logout' %}" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn-nav btn-logout">Sign Out</button>
+                </form>
             {% else %}
                 <a href="{% url 'accounts:login' %}" class="nav-link">Sign In</a>
                 <a href="{% url 'accounts:register' %}" class="btn-nav">Register</a>

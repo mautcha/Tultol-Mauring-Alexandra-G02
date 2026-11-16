@@ -1,8 +1,13 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
 from django.contrib.auth.models import User
-from .forms import RegistrationForm, LoginForm
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.forms import PasswordChangeForm
+from django.utils.http import url_has_allowed_host_and_scheme
+from django.views.decorators.http import require_POST
+from .forms import RegistrationForm, LoginForm, ProfileForm
+from .models import Profile
 
 
 def register_view(request):
@@ -62,8 +67,12 @@ def login_view(request):
                 role_display = user.profile.get_role_display() if hasattr(user, 'profile') else 'User'
                 messages.success(request, f"Welcome back, {user.username}! ({role_display})")
                 
-                next_url = request.GET.get('next')
-                if next_url:
+                next_url = request.POST.get('next') or request.GET.get('next')
+                if next_url and url_has_allowed_host_and_scheme(
+                    next_url,
+                    allowed_hosts={request.get_host()},
+                    require_https=request.is_secure(),
+                ):
                     return redirect(next_url)
 
                 # Direct role-based redirection
@@ -81,10 +90,67 @@ def login_view(request):
     return render(request, 'accounts/login.html', {'form': form})
 
 
+@require_POST
 def logout_view(request):
     """
-    Logs out the user and ends their session.
+    Logs out the user and ends their session (POST only).
     """
     logout(request)
     messages.success(request, "You have been logged out successfully.")
     return redirect('accounts:login')
+
+
+@login_required
+def profile_view(request):
+    """
+    Displays the logged-in user's own profile information.
+    """
+    profile, _ = Profile.objects.get_or_create(user=request.user)
+    return render(request, 'accounts/profile.html', {
+        'user': request.user,
+        'profile': profile,
+    })
+
+
+@login_required
+def profile_edit_view(request):
+    """
+    Allows the logged-in user to edit only their own profile details.
+    """
+    profile, _ = Profile.objects.get_or_create(user=request.user)
+
+    if request.method == 'POST':
+        form = ProfileForm(request.POST, request.FILES, instance=profile, user=request.user)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Your profile has been updated.")
+            return redirect('accounts:profile')
+        else:
+            messages.error(request, "Please fix the errors below and try again.")
+    else:
+        form = ProfileForm(instance=profile, user=request.user)
+
+    return render(request, 'accounts/profile_edit.html', {
+        'form': form,
+        'profile': profile,
+    })
+
+
+@login_required
+def change_password_view(request):
+    """
+    Allows the logged-in user to change their own password without ending their session.
+    """
+    if request.method == 'POST':
+        form = PasswordChangeForm(request.user, request.POST)
+        if form.is_valid():
+            user = form.save()
+            update_session_auth_hash(request, user)
+            messages.success(request, "Your password has been updated.")
+            return redirect('accounts:profile')
+        else:
+            messages.error(request, "Please fix the errors below and try again.")
+    else:
+        form = PasswordChangeForm(request.user)
+
+    return render(request, 'accounts/change_password.html', {'form': form})

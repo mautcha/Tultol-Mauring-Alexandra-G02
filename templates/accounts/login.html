@@ -32,6 +32,9 @@
             {% for error in form.password.errors %}
                 <span class="error-text">{{ error }}</span>
             {% endfor %}
+            <div style="text-align: right; margin-top: 6px;">
+                <a href="{% url 'accounts:password_reset' %}" class="auth-link" style="font-size: 13px;">Forgot password?</a>
+            </div>
         </div>
 
         <button type="submit" class="btn-submit">Sign In</button>

@@ -11,12 +11,14 @@ https://docs.djangoproject.com/en/6.1/ref/settings/
 """
 
 import os
+import sys
 from pathlib import Path
+from django.core.exceptions import ImproperlyConfigured
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Load environment variables from .env file if present
+# Load environment variables from .env file if present (override stale env vars)
 env_file = BASE_DIR / '.env'
 if env_file.exists():
     with open(env_file) as f:
@@ -24,7 +26,7 @@ if env_file.exists():
             line = line.strip()
             if line and not line.startswith('#') and '=' in line:
                 key, val = line.split('=', 1)
-                os.environ.setdefault(key.strip(), val.strip().strip("'\""))
+                os.environ[key.strip()] = val.strip().strip("'\"")
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.1/howto/deployment/checklist/
@@ -88,22 +90,29 @@ WSGI_APPLICATION = 'tultol.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/6.1/ref/settings/#databases
 
-if os.environ.get('DB_HOST') and os.environ.get('DB_PASSWORD') not in ('', 'your-database-password'):
+if 'test' in sys.argv or os.environ.get('USE_SQLITE_FOR_TESTS') == '1':
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
+else:
+    db_host = os.environ.get('DB_HOST', '').strip()
+    db_password = os.environ.get('DB_PASSWORD', '').strip()
+    if not db_host or db_password in ('', 'your-database-password'):
+        raise ImproperlyConfigured(
+            "Supabase PostgreSQL credentials are missing or still placeholders. "
+            "Set DB_HOST and DB_PASSWORD in your .env file."
+        )
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql',
             'NAME': os.environ.get('DB_NAME', 'postgres'),
             'USER': os.environ.get('DB_USER', 'postgres'),
-            'PASSWORD': os.environ.get('DB_PASSWORD', ''),
-            'HOST': os.environ.get('DB_HOST', ''),
+            'PASSWORD': db_password,
+            'HOST': db_host,
             'PORT': os.environ.get('DB_PORT', '5432'),
-        }
-    }
-else:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'db.sqlite3',
         }
     }
 
@@ -148,6 +157,10 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.1/howto/static-files/
 
 STATIC_URL = 'static/'
+
+# Media files (profile photos, uploads)
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
 
 
 # Email

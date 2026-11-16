@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit Profile - Tultol{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2>Edit Profile</h2>
+    <p class="card-subtitle">Update your personal details and profile photo.</p>
+
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="{{ form.first_name.id_for_label }}">{{ form.first_name.label }}</label>
+                {{ form.first_name }}
+                {% for error in form.first_name.errors %}
+                    <span class="error-text">{{ error }}</span>
+                {% endfor %}
+            </div>
+            <div class="form-group">
+                <label for="{{ form.last_name.id_for_label }}">{{ form.last_name.label }}</label>
+                {{ form.last_name }}
+                {% for error in form.last_name.errors %}
+                    <span class="error-text">{{ error }}</span>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="{{ form.email.id_for_label }}">{{ form.email.label }}</label>
+            {{ form.email }}
+            {% for error in form.email.errors %}
+                <span class="error-text">{{ error }}</span>
+            {% endfor %}
+        </div>
+
+        <div class="form-group">
+            <label for="{{ form.contact_number.id_for_label }}">{{ form.contact_number.label }}</label>
+            {{ form.contact_number }}
+            {% for error in form.contact_number.errors %}
+                <span class="error-text">{{ error }}</span>
+            {% endfor %}
+        </div>
+
+        <div class="form-group">
+            <label for="{{ form.profile_photo.id_for_label }}">{{ form.profile_photo.label }}</label>
+            {% if profile.profile_photo %}
+                <div style="margin-bottom: 8px;">
+                    <img src="{{ profile.profile_photo.url }}" alt="Current Photo"
+                         style="width: 56px; height: 56px; border-radius: 50%; object-fit: cover; border: 1px solid #cbd5e1;">
+                </div>
+            {% endif %}
+            {{ form.profile_photo }}
+            {% for error in form.profile_photo.errors %}
+                <span class="error-text">{{ error }}</span>
+            {% endfor %}
+        </div>
+
+        <button type="submit" class="btn-submit">Save Changes</button>
+    </form>
+
+    <div class="card-footer">
+        <a href="{% url 'accounts:profile' %}" class="auth-link">Cancel</a>
+    </div>
+</div>
+{% endblock %}

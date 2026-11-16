@@ -2,18 +2,10 @@ from django import forms
 from django.contrib.auth.models import User
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
+from .models import Profile
 
 
 class RegistrationForm(forms.ModelForm):
-    role = forms.ChoiceField(
-        label="Account Role",
-        choices=[
-            ('shopper', 'Shopper (Mallgoer)'),
-            ('admin', 'Mall Admin / Staff'),
-        ],
-        initial='shopper',
-        required=True
-    )
     password = forms.CharField(
         label="Password",
         widget=forms.PasswordInput(attrs={'placeholder': 'Enter a password'}),
@@ -78,12 +70,8 @@ class RegistrationForm(forms.ModelForm):
         user.set_password(self.cleaned_data['password'])
         if commit:
             user.save()
-            # Assign selected role to the profile
-            role = self.cleaned_data.get('role', 'shopper')
-            user.profile.role = role
-            if role == 'admin':
-                user.is_staff = True
-            user.save()
+            # Public registration always creates Shopper accounts
+            user.profile.role = 'shopper'
             user.profile.save()
         return user
 
@@ -99,3 +87,68 @@ class LoginForm(forms.Form):
         widget=forms.PasswordInput(attrs={'placeholder': 'Enter your password'}),
         required=True
     )
+
+
+class ProfileForm(forms.ModelForm):
+    """Form for updating user profile info (name, email, contact number, photo)."""
+    first_name = forms.CharField(
+        label="First Name", required=False,
+        widget=forms.TextInput(attrs={'placeholder': 'First name'})
+    )
+    last_name = forms.CharField(
+        label="Last Name", required=False,
+        widget=forms.TextInput(attrs={'placeholder': 'Last name'})
+    )
+    email = forms.EmailField(
+        label="Email", required=True,
+        widget=forms.EmailInput(attrs={'placeholder': 'Email address'})
+    )
+
+    class Meta:
+        model = Profile
+        fields = ['contact_number', 'profile_photo']
+        widgets = {
+            'contact_number': forms.TextInput(attrs={'placeholder': 'e.g. 09171234567'}),
+        }
+        labels = {
+            'contact_number': 'Contact Number',
+            'profile_photo': 'Profile Photo',
+        }
+
+    def __init__(self, *args, **kwargs):
+        # Accept the user instance so we can pre-fill user fields
+        self.user = kwargs.pop('user', None)
+        super().__init__(*args, **kwargs)
+        if self.user:
+            self.fields['first_name'].initial = self.user.first_name
+            self.fields['last_name'].initial = self.user.last_name
+            self.fields['email'].initial = self.user.email
+
+    def clean_email(self):
+        email = self.cleaned_data.get('email', '').strip().lower()
+        # Allow same email (user is editing their own profile)
+        if User.objects.filter(email__iexact=email).exclude(pk=self.user.pk).exists():
+            raise ValidationError("This email is already used by another account.")
+        return email
+
+    def clean_profile_photo(self):
+        photo = self.cleaned_data.get('profile_photo')
+        if photo and hasattr(photo, 'size'):
+            if photo.size > 2 * 1024 * 1024:
+                raise ValidationError("Profile photo must be smaller than 2 MB.")
+            content_type = getattr(photo, 'content_type', '')
+            if content_type and not content_type.startswith('image/'):
+                raise ValidationError("Please upload a valid image file.")
+        return photo
+
+    def save(self, commit=True):
+        profile = super().save(commit=False)
+        if self.user:
+            self.user.first_name = self.cleaned_data['first_name']
+            self.user.last_name = self.cleaned_data['last_name']
+            self.user.email = self.cleaned_data['email']
+            if commit:
+                self.user.save()
+        if commit:
+            profile.save()
+        return profile

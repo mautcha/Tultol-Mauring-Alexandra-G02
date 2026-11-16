@@ -19,6 +19,9 @@ pycache/
 *.sqlite3
 db.sqlite3
 
+# Uploaded media files
+media/
+
 # OS files
 .DS_Store
 Thumbs.db
